@@ -1,10 +1,21 @@
+<script setup>
+import { inject } from 'vue';
+
+const { results } = inject('result', 0);
+</script>
 <template>
     <div class="result__card">
-        <h3>Your monthly repayments</h3>
-        <p class="monthly">$1,234.00</p>
+        <div v-if="results.type === 'repayment'">
+            <h3>Your monthly repayments</h3>
+            <p class="monthly">&#163;{{ Number(results.monthly).toLocaleString('en-GB') }}</p>
+        </div>
+        <div v-if="results.type === 'interest'">
+            <h3>Total interest</h3>
+            <p class="monthly">&#163;{{ Number(results.interest).toLocaleString('en-GB') }}</p>
+        </div>
         <hr>
         <h3>Total you'll repay over the term</h3>
-        <p class="interest">$0.00</p>
+        <p class="interest">&#163;{{ Number(results.total).toLocaleString('en-GB') }}</p>
     </div>
 </template>
 

@@ -1,19 +1,27 @@
 <script setup>
+import { ref, provide } from 'vue';
 import CalculationForm from '@/components/CalculationForm.vue';
 import ResultEmpty from '@/components/ResultEmpty.vue';
 import ResultComplete from '@/components/ResultComplete.vue';
+
+const results = ref(0)
+provide('result', { results });
+function receiveResults(data) {
+  results.value = data
+  return data
+}
 </script>
 
 <template>
   <div class="card">
     <div>
       <!-- form -->
-      <CalculationForm />
+      <CalculationForm @calculated="receiveResults" @clear="results = 0" />
     </div>
     <div class="card__result">
       <!-- Result -->
-      <ResultEmpty />
-      <!-- <ResultComplete /> -->
+      <ResultEmpty v-if="!results" />
+      <ResultComplete v-else />
     </div>
   </div>
 </template>

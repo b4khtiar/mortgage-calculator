@@ -1,47 +1,97 @@
+<script setup>
+import { ref, provide } from 'vue';
+
+const emit = defineEmits(['calculated', 'clear']);
+const amount = ref(null);
+const term = ref(null);
+const rate = ref(null);
+const calculationType = ref(null);
+const monthlyRepayment = ref(0);
+const interest = ref(0);
+const totalRepayment = ref(0);
+
+const validate = () => {
+    const isValid = false
+
+}
+function calculate() {
+    const valid = validate();
+    if (!valid) return;
+    // calculate monthly repayments & interest
+    const monthlyRate = Number(rate.value) / 100 / 12;
+    const repayments = amount.value * monthlyRate * Math.pow(1 + monthlyRate, term.value * 12) / (Math.pow(1 + monthlyRate, term.value * 12) - 1);
+    const repaymentTotal = (repayments * term.value * 12);
+    const interestTotal = repaymentTotal - amount.value;
+    // store results
+    monthlyRepayment.value = repayments.toFixed(2);
+    interest.value = interestTotal.toFixed(2);
+    totalRepayment.value = repaymentTotal.toFixed(2);
+    // emit results
+    const results = {
+        type: calculationType.value,
+        monthly: monthlyRepayment.value,
+        interest: interestTotal.toFixed(2),
+        total: totalRepayment.value
+    }
+    emit('calculated', results);
+}
+function clearForm() {
+    amount.value = null;
+    term.value = null;
+    rate.value = null;
+    calculationType.value = null;
+    monthlyRepayment.value = 0;
+    interest.value = 0;
+    totalRepayment.value = 0;
+    emit('clear');
+}
+</script>
+
 <template>
-    <div class="form">
+    <form novalidate class="form" @submit.prevent="calculate">
         <div class="form__header">
             <h1 class="form__title">Mortgage Calculator</h1>
-            <button class="form--clear">Clear All</button>
+            <button @click="clearForm" class="form--clear">Clear All</button>
         </div>
         <label class="form__field" for="amount">
             <span class="label">Mortgage Amount</span>
             <div>
-                <span class="addon start">$</span>
-                <input type="text" name="amount" id="amount" />
+                <span class="addon start">&#163;</span>
+                <input type="number" required min="1" name="amount" id="amount" v-model="amount" />
             </div>
-            <small class="error">Please input a valid amount</small>
+            <small id="amount-error" class="error">Please enter a valid amount</small>
         </label>
         <div class="form__field--group">
             <label class="form__field" for="term">
                 <span class="label">Mortgage Term</span>
                 <div>
                     <span class="addon end">Years</span>
-                    <input type="text" name="term" id="term" />
+                    <input type="number" required min="1" name="term" id="term" v-model="term" />
                 </div>
-                <small class="error">Please input a valid term</small>
+                <small id="term-error" class="error">Please enter a valid term</small>
             </label>
             <label class="form__field" for="rate">
                 <span class="label">Interest Rate</span>
                 <div>
                     <span class="addon end">%</span>
-                    <input type="text" name="rate" id="rate" />
+                    <input type="number" required min="0.01" step="0.01" name="rate" id="rate" v-model="rate" />
                 </div>
-                <small class="error">Please input a valid rate</small>
+                <small id="rate-error" class="error">Please enter a valid rate</small>
             </label>
         </div>
         <fieldset>
             <legend class="label">Mortgage Type</legend>
             <label class="form__field select" for="type-1">
-                <input type="radio" name="type" id="type-1">
+                <input v-model="calculationType" type="radio" name="type" id="type-1" value="repayment">
                 <span>Repayment</span>
             </label>
             <label class="form__field select" for="type-2">
-                <input type="radio" name="type" id="type-2">
+                <input v-model="calculationType" type="radio" name="type" id="type-2" value="interest">
                 <span>Interest Only</span>
             </label>
+            <small id="mortgage-type-error" class="error">This field is required</small>
         </fieldset>
-        <button class="form__submit">
+        <button type="submit" class="form__submit">
             <span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                     <path fill="#133041"
@@ -50,7 +100,7 @@
             </span>
             Calculate Repayments
         </button>
-    </div>
+    </form>
 </template>
 
 <style scoped>
@@ -112,8 +162,13 @@
             transform: translateY(-50%);
             padding: 0.75rem;
             background-color: var(--slate-100);
-            border-radius: var(--input-border-radius);
+            border-radius: 3px;
             font-weight: 700;
+        }
+
+        .addon:has(~input:invalid:not(:focus)) {
+            background-color: var(--red);
+            color: var(--white);
         }
 
         .start {
@@ -127,7 +182,7 @@
         }
 
         .end {
-            right: 0.1rem;
+            right: 0.09rem;
             border-top-left-radius: 0;
             border-bottom-left-radius: 0;
         }
@@ -141,23 +196,44 @@
 .form__field.select {
     flex-direction: row;
     align-items: center;
-    border: 0.1rem solid var(--slate-700);
+    border: 0.1rem solid var(--slate-500);
     border-radius: var(--input-border-radius);
     padding: 0.75rem 1rem;
     margin-top: 0.5rem;
     font-weight: 700;
-    color: var(--slate-900);
+    color: var(--slate-700);
+}
+
+.form__field.select:hover {
+    border-color: var(--lime);
+    transition: border-color 0.2s ease-in-out;
+}
+
+.form__field.select:focus-within {
+    outline: 2px solid var(--slate-900);
+    outline-offset: 0.125rem;
+    transition: outline 0.2s ease-in-out;
 }
 
 .form__field.select:has(input:checked) {
     border-color: var(--lime);
     background-color: var(--input-background);
-    transition: background-color 0.2s ease-in-out;
+    color: var(--slate-900);
+    transition: all 0.2s ease-in-out;
 }
 
 .error {
     display: none;
     color: var(--red);
+}
+
+fieldset>.error {
+    margin-top: 0.5rem;
+}
+
+label:has(input:invalid:not(:focus)) .error,
+fieldset:has(input:invalid:not(:focus)) .error {
+    display: block;
 }
 
 input[type="radio"] {

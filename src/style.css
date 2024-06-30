@@ -53,7 +53,29 @@ input {
   font-weight: 700;
   color: var(--slate-900);
   border-radius: var(--input-border-radius);
-  border: 0.1rem solid var(--slate-700);
+  border: 0.1rem solid var(--slate-500);
+}
+
+/* remove spinner on number input */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+input:focus {
+  outline-color: var(--slate-900);
+  outline-offset: 0.025rem;
+  transition: outline 0.2s ease-in-out;
+}
+
+input:user-invalid:not(:focus) {
+  border-color: var(--red);
+  color: var(--red);
 }
 
 label {
