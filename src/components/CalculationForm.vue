@@ -10,12 +10,8 @@ const monthlyRepayment = ref(0);
 const interest = ref(0);
 const totalRepayment = ref(0);
 
-const validate = () => {
-    const isValid = false
-
-}
 function calculate() {
-    const valid = validate();
+    const valid = amount.value && term.value && rate.value && calculationType.value;
     if (!valid) return;
     // calculate monthly repayments & interest
     const monthlyRate = Number(rate.value) / 100 / 12;
@@ -36,10 +32,7 @@ function calculate() {
     emit('calculated', results);
 }
 function clearForm() {
-    amount.value = null;
-    term.value = null;
-    rate.value = null;
-    calculationType.value = null;
+    document.getElementById('calculation-form').reset();
     monthlyRepayment.value = 0;
     interest.value = 0;
     totalRepayment.value = 0;
@@ -48,7 +41,7 @@ function clearForm() {
 </script>
 
 <template>
-    <form novalidate class="form" @submit.prevent="calculate">
+    <form id="calculation-form" class="form" @submit.prevent="calculate">
         <div class="form__header">
             <h1 class="form__title">Mortgage Calculator</h1>
             <button @click="clearForm" class="form--clear">Clear All</button>
@@ -82,11 +75,11 @@ function clearForm() {
         <fieldset>
             <legend class="label">Mortgage Type</legend>
             <label class="form__field select" for="type-1">
-                <input v-model="calculationType" type="radio" name="type" id="type-1" value="repayment">
+                <input v-model="calculationType" required type="radio" name="type" id="type-1" value="repayment">
                 <span>Repayment</span>
             </label>
             <label class="form__field select" for="type-2">
-                <input v-model="calculationType" type="radio" name="type" id="type-2" value="interest">
+                <input v-model="calculationType" required type="radio" name="type" id="type-2" value="interest">
                 <span>Interest Only</span>
             </label>
             <small id="mortgage-type-error" class="error">This field is required</small>
@@ -166,7 +159,7 @@ function clearForm() {
             font-weight: 700;
         }
 
-        .addon:has(~input:invalid:not(:focus)) {
+        .addon:has(~input:user-invalid) {
             background-color: var(--red);
             color: var(--white);
         }
@@ -222,6 +215,10 @@ function clearForm() {
     transition: all 0.2s ease-in-out;
 }
 
+.form__field.select:has(input:user-invalid:not(:focus)) {
+    border-color: var(--red);
+}
+
 .error {
     display: none;
     color: var(--red);
@@ -231,8 +228,8 @@ fieldset>.error {
     margin-top: 0.5rem;
 }
 
-label:has(input:invalid:not(:focus)) .error,
-fieldset:has(input:invalid:not(:focus)) .error {
+label:has(input:user-invalid) .error,
+fieldset:has(input:user-invalid) .error {
     display: block;
 }
 
@@ -281,6 +278,11 @@ input[type="radio"]:checked::before {
     padding: 0.75rem 2.5rem;
     border-radius: 2rem;
     cursor: pointer;
+}
+
+.form__submit:hover {
+    background-color: var(--lime-hover);
+    transition: background-color 0.2s ease-in-out;
 }
 
 @container (width > 380px) {

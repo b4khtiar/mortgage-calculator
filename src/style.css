@@ -19,6 +19,7 @@
   --slate-700: hsl(200, 24%, 40%);
   --slate-900: hsl(202, 55%, 16%);
   --black: hsl(201, 63%, 12%);
+  --lime-hover: hsl(61, 70%, 52%, 0.5);
 
   --input-border-radius: 0.25rem;
   --input-background: hsl(61, 70%, 52%, 0.1);
